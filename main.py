@@ -3,8 +3,6 @@
 # Fecha: 28-01-2026
 import os
 
-# --- FUNCIONES DE SEGURIDAD (Tu Parte) ---
-
 def preparar_archivo_usuarios():
     
     if not os.path.exists("usuarios.txt"):

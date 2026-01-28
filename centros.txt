@@ -1,0 +1,4 @@
+Quito,Sierra,0
+Guayaquil,Costa,400
+Cuenca,Sierra,450
+Manta,Costa,380

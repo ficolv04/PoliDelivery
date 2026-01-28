@@ -72,6 +72,62 @@ def iniciar_sesion():
     print("Usuario o clave incorrectos.")
     return "ninguno"
 
+def cargar_centros():
+    centros = []
+    if os.path.exists("centros.txt"):
+        with open("centros.txt", "r") as f:
+            for linea in f:
+                datos = linea.strip().split(",")
+                if len(datos) == 3:
+                    centros.append({
+                        "nombre": datos[0],
+                        "region": datos[1],
+                        "costo": int(datos[2])
+                    })
+    return centros
+
+# Algoritmo de Burbuja 
+def ordenar_burbuja(lista, llave):
+    n = len(lista)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if lista[j][llave] > lista[j + 1][llave]:
+                lista[j], lista[j + 1] = lista[j + 1], lista[j]
+    return lista
+
+# Algoritmo Quick Sort 
+def quick_sort(lista, llave):
+    if len(lista) <= 1:
+        return lista
+    pivote = lista[len(lista) // 2][llave]
+    izquierda = [x for x in lista if x[llave] < pivote]
+    centro = [x for x in lista if x[llave] == pivote]
+    derecha = [x for x in lista if x[llave] > pivote]
+    return quick_sort(izquierda, llave) + centro + quick_sort(derecha, llave)
+
+def listar_centros_admin():
+    centros = cargar_centros()
+    if not centros:
+        print("\n[!] No hay centros registrados en centros.txt.")
+        return
+
+    print("\n--- Listar Centros ---")
+    print("1. Ordenar por Nombre (Burbuja)")
+    print("2. Ordenar por Costo/Distancia (Quick Sort)")
+    metodo = input("Seleccione método: ")
+
+    if metodo == "1":
+        centros_ordenados = ordenar_burbuja(centros, "nombre")
+    elif metodo == "2":
+        centros_ordenados = quick_sort(centros, "costo")
+    else:
+        print("Opción no válida.")
+        return
+
+    print("\nID | NOMBRE       | REGION     | COSTO/DIST")
+    print("-" * 45)
+    for i, c in enumerate(centros_ordenados):
+        print(f"{i+1:<2} | {c['nombre']:<12} | {c['region']:<10} | {c['costo']}")
 # --- MENÚS DEL SISTEMA ---
 
 
@@ -110,34 +166,24 @@ while True:
     opcion = input("Seleccione una opción: ")
 
     if opcion == "1":
-        print("\n--- Inicio de Sesión ---")
-        usuario = input("Usuario: ")
-        # Aquí irá la lógica de validación con usuarios.txt 
-        
-        # Simulación de entrada a roles
-        if "admin" in usuario:
+        rol = iniciar_sesion()
+        if rol == "administrador":
             while True:
-                menu_administrador() 
+                menu_administrador()
+                sub_opcion = input("Seleccione una acción: ")
+                
+                if sub_opcion == "1":
+                    print("Lógica para agregar centros...")
+                elif sub_opcion == "2":
+                    listar_centros_admin() # <--- Aquí llamas al Literal 2
+                elif sub_opcion == "7":
+                    break
+        elif rol == "cliente":
+            while True:
+                menu_cliente()
                 sub_opcion = input("Seleccione una acción: ")
                 if sub_opcion == "7": break
-        else:
-            while True:
-                menu_cliente() 
-                sub_opcion = input("Seleccione una acción: ")
-                if sub_opcion == "7": break
+                # Aquí irán las llamadas a funciones de cliente
 
     elif opcion == "2":
-        print("\n--- Registro de Nuevo Cliente ---")
-        # Datos requeridos por el sistema 
-        nombre = input("Nombres y Apellidos: ")
-        cedula = input("Identificación: ")
-        edad = input("Edad: ")
-        correo = input("Usuario (ejemplo@gmail.com): ")
-        password = input("Contraseña segura: ")
-        print("\n[Sistema] Registro completado. Datos guardados en usuarios.txt.")
-
-    elif opcion == "3":
-        print("Saliendo del sistema... ¡Gracias por usar PoliDelivery!")
-        break
-    else:
-        print("Opción no válida. Intente de nuevo.")
+        registrar_cliente()

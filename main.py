@@ -161,29 +161,28 @@ def menu_cliente():
     print("7. Cerrar Sesión")
 
 # Bucle principal de ejecución
+# --- EJECUCIÓN PRINCIPAL ---
+preparar_archivo_usuarios() 
+
 while True:
     mostrar_menu_principal()
     opcion = input("Seleccione una opción: ")
 
     if opcion == "1":
-        rol = iniciar_sesion()
-        if rol == "administrador":
-            while True:
-                menu_administrador()
-                sub_opcion = input("Seleccione una acción: ")
-                
-                if sub_opcion == "1":
-                    print("Lógica para agregar centros...")
-                elif sub_opcion == "2":
-                    listar_centros_admin() # <--- Aquí llamas al Literal 2
-                elif sub_opcion == "7":
-                    break
-        elif rol == "cliente":
-            while True:
-                menu_cliente()
-                sub_opcion = input("Seleccione una acción: ")
-                if sub_opcion == "7": break
-                # Aquí irán las llamadas a funciones de cliente
-
+    
+        rol_detectado = iniciar_sesion() 
+    
+    if rol_detectado == "administrador":
+        while True:
+            menu_administrador()
+            sub_opcion = input("Seleccione una acción: ")
+            if sub_opcion == "7": break
+    elif rol_detectado == "cliente":
+        while True:
+            menu_cliente()
+            sub_opcion = input("Seleccione una acción: ")
+            if sub_opcion == "7": break
+       
     elif opcion == "2":
         registrar_cliente()
+    # ... resto del código

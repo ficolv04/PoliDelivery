@@ -3,6 +3,9 @@
 # Fecha: 2026-01-31
 
 import os
+import heapq # Requisito: Heap para Dijkstra 
+from collections import deque # Para BFS
+
 
 # ==========================================
 # SECCIÓN: PERSISTENCIA (Manejo de Archivos)
@@ -50,6 +53,104 @@ def validar_contrasena(password):
             tiene_numero = True
             
     return tiene_minuscula and tiene_mayuscula and tiene_numero
+
+# ==========================================
+# SECCIÓN: ESTRUCTURAS DE DATOS (Árboles y Grafos)
+# ==========================================
+
+class NodoArbol:
+    """Requisito Literal 8: Organización jerárquica por regiones[cite: 8]."""
+    def __init__(self, nombre):
+        self.nombre = nombre
+        self.hijos = []
+
+def construir_arbol_regiones(centros):
+    """Crea una estructura de árbol: Raíz -> Regiones -> Centros[cite: 8, 15]."""
+    raiz = NodoArbol("PoliDelivery - Ecuador")
+    regiones = {}
+    for c in centros:
+        reg = c["region"]
+        if reg not in regiones:
+            regiones[reg] = NodoArbol(reg)
+            raiz.hijos.append(regiones[reg])
+        regiones[reg].hijos.append(NodoArbol(c["nombre"]))
+    return raiz
+
+def explorar_arbol_recursivo(nodo, nivel=0):
+    """Literal 19: Explorar centros jerárquicamente."""
+    print("  " * nivel + "|-- " + nodo.nombre)
+    for hijo in nodo.hijos:
+        explorar_arbol_recursivo(hijo, nivel + 1)
+
+# ==========================================
+# SECCIÓN: ALGORITMOS DE BÚSQUEDA (BFS/DFS)
+# ==========================================
+
+def bfs_centros_cercanos(grafo, inicio):
+    """Literal 15: BFS para búsqueda de centros cercanos."""
+    visitados = set([inicio])
+    cola = deque([inicio])
+    print(f"\nCentros cercanos a {inicio}:")
+    while cola:
+        actual = cola.popleft()
+        for vecino, costo in grafo.get(actual, []):
+            if vecino not in visitados:
+                visitados.add(vecino)
+                cola.append(vecino)
+                print(f" -> {vecino}")
+
+def dfs_exploracion_completa(grafo, inicio, visitados=None):
+    """Literal 15: DFS para exploración completa de rutas."""
+    if visitados is None: visitados = set()
+    visitados.add(inicio)
+    print(f"Visitando: {inicio}")
+    for vecino, costo in grafo.get(inicio, []):
+        if vecino not in visitados:
+            dfs_exploracion_completa(grafo, vecino, visitados)
+
+# ==========================================
+# SECCIÓN: GESTIÓN DE ENVÍOS (CLIENTE)
+# ==========================================
+
+envio_actual = [] # Lista para almacenar centros seleccionados [cite: 20]
+
+def gestionar_envio_cliente(nombre_cliente):
+    """Literal 19-21: Seleccionar, listar, ordenar y guardar envío[cite: 19, 20, 21]."""
+    global envio_actual
+    while True:
+        print("\n--- GESTIÓN DE MI ENVÍO ---")
+        print("1. Seleccionar centros (min 2)\n2. Listar y Ordenar selección\n3. Eliminar centros seleccionados\n4. Guardar y Salir")
+        op = input("Seleccione: ")
+        
+        if op == "1":
+            centros = cargar_centros()
+            for i, c in enumerate(centros): print(f"{i}. {c['nombre']}")
+            idx = int(input("Ingrese el ID del centro a añadir: "))
+            envio_actual.append(centros[idx])
+        
+        elif op == "2":
+            if not envio_actual: print("Vacío."); continue
+            print("\n1. Ordenar por Nombre\n2. Ordenar por Costo")
+            met = input("Método: ")
+            if met == "1": envio_actual = quick_sort(envio_actual, "nombre")
+            else: envio_actual = quick_sort(envio_actual, "costo")
+            for c in envio_actual: print(f"- {c['nombre']} (${c['costo']})")
+        
+        elif op == "3":
+            envio_actual = []
+            print("Selección eliminada.")
+            
+        elif op == "4":
+            if len(envio_actual) < 2:
+                print("Error: Debe seleccionar mínimo dos centros.")
+            else:
+                # Literal 21: Guardar en archivo rutas-nombre-del-cliente.txt [cite: 21]
+                filename = f"rutas-{nombre_cliente.replace(' ', '-')}.txt"
+                with open(filename, "w") as f:
+                    f.write(f"Envío de: {nombre_cliente}\n")
+                    for c in envio_actual: f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
+                print(f"Guardado en {filename}")
+                break
 
 #=======================================
 # SECCION: ALGORITMOS GRAFOS
@@ -212,12 +313,12 @@ def iniciar_sesion():
                 if len(datos) >= 6:
                     if datos[3] == u_ingresado and datos[4] == p_ingresado:
                         print(f"\n¡Acceso concedido! Bienvenido {datos[0]}")
-                        return datos[5] # Retorna el rol: 'administrador' o 'cliente'
+                        return datos[5] ,datos[0]# Retorna el rol: 'administrador' o 'cliente'
     except Exception as e:
         print(f"Error al leer la base de datos: {e}")
     
     print("Usuario o clave incorrectos.")
-    return "ninguno"
+    return "ninguno" , None
 
 # ==========================================
 # SECCIÓN: MENÚS Y VISTAS
@@ -405,7 +506,19 @@ def consultar_ruta_cliente():
     else:
         print("\n[!] No se pudo calcular una ruta entre esas ciudades.")
 
-
+def menu_cliente_completo(nombre_cliente):
+    while True:
+        menu_cliente() # El menú que ya tenías
+        print("3. Explorar Jerarquía (Árboles)")
+        print("4. Gestionar Carrito de Envío")
+        sub = input("Seleccione: ")
+        if sub == "7": break
+        elif sub == "1": mostrar_mapa_centros()
+        elif sub == "2": consultar_ruta_cliente()
+        elif sub == "3":
+            arbol = construir_arbol_regiones(cargar_centros())
+            explorar_arbol_recursivo(arbol)
+        elif sub == "4": gestionar_envio_cliente(nombre_cliente)
 # ==========================================
 # SECCIÓN: EJECUCIÓN PRINCIPAL
 # ==========================================
@@ -417,7 +530,7 @@ while True:
     opcion = input("Seleccione una opción: ")
 
     if opcion == "1":
-        rol = iniciar_sesion()
+        rol,nombre_u = iniciar_sesion()
         
         # MENÚ PARA ADMINISTRADOR
         if rol == "administrador":
@@ -441,15 +554,7 @@ while True:
         # MENÚ PARA CLIENTE
 
         elif rol == "cliente":
-            while True:
-                menu_cliente()
-                sub_opcion = input("Seleccione una acción: ")
-                if sub_opcion == "7": 
-                    break
-                elif sub_opcion == "1":
-                    mostrar_mapa_centros() 
-                elif sub_opcion == "2":
-                    consultar_ruta_cliente() 
+            menu_cliente_completo(nombre_u)
 
     elif opcion == "2":
         registrar_cliente()

@@ -1,4 +1,3 @@
+Envío de: Elian Lara
 Quito,Sierra,0
 Guayaquil,Costa,400
-Cuenca,Sierra,120
-Manta,Costa,225

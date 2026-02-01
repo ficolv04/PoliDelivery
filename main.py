@@ -51,6 +51,67 @@ def validar_contrasena(password):
             
     return tiene_minuscula and tiene_mayuscula and tiene_numero
 
+#=======================================
+# SECCION: ALGORITMOS GRAFOS
+#=======================================
+
+def construir_grafo():
+    
+    centros = cargar_centros()
+    grafo = {}
+    
+    for c in centros:
+        grafo[c["nombre"]] = []
+
+    # REGLA DE NEGOCIO: Para el proyecto, conectaremos centros de la misma región
+    # con un costo menor, y de diferentes regiones con un costo mayor.
+    for i in range(len(centros)):
+        for j in range(i + 1, len(centros)):
+            c1 = centros[i]
+            c2 = centros[j]
+            
+            
+            distancia = (c1["costo"] + c2["costo"]) // 2
+            
+            # Si son de diferente región, el envío es más caro (penalidad)
+            if c1["region"] != c2["region"]:
+                distancia += 50 
+            
+            # Añadimos la conexión bidireccional
+            grafo[c1["nombre"]].append((c2["nombre"], distancia))
+            grafo[c2["nombre"]].append((c1["nombre"], distancia))
+            
+    return grafo
+import heapq # Requisito del documento: Usar Heap para optimizar Dijkstra 
+
+def calcular_ruta_optima(inicio, destino):
+    """Literal 11 y 12: Encuentra la ruta más económica usando Dijkstra."""
+    grafo = construir_grafo()
+    
+    if inicio not in grafo or destino not in grafo:
+        return None, float('inf')
+
+    # Cola de prioridad: (costo_acumulado, nodo_actual, camino_recorrido)
+    cola_prioridad = [(0, inicio, [])]
+    visitados = set()
+
+    while cola_prioridad:
+        (costo, actual, camino) = heapq.heappop(cola_prioridad)
+
+        if actual in visitados:
+            continue
+
+        camino = camino + [actual]
+        visitados.add(actual)
+
+        if actual == destino:
+            return camino, costo
+
+        for (vecino, peso) in grafo.get(actual, []):
+            if vecino not in visitados:
+                heapq.heappush(cola_prioridad, (costo + peso, vecino, camino))
+
+    return None, float('inf')
 # ==========================================
 # SECCIÓN: ALGORITMOS DE ORDENAMIENTO
 # ==========================================
@@ -122,6 +183,56 @@ def iniciar_sesion():
 # ==========================================
 # SECCIÓN: MENÚS Y VISTAS
 # ==========================================
+# ==========================================
+# SECCIÓN: GESTIÓN DE CENTROS (ADMIN)
+# ==========================================
+
+
+def agregar_centro():
+    """Permite al administrador ingresar un nuevo centro al archivo .txt"""
+    print("\n--- Agregar Nuevo Centro de Distribución ---")
+    nombre = input("Nombre del centro: ")
+    region = input("Región (Costa/Sierra/Oriente): ")
+    try:
+        costo = int(input("Costo de envío base: "))
+        # Guardamos en el archivo usando "a" (append) para no borrar lo anterior
+        with open("centros.txt", "a") as f:
+            f.write(f"{nombre},{region},{costo}\n")
+        print(f"\n[Sistema] Centro '{nombre}' guardado exitosamente.")
+    except ValueError:
+        print("\n[!] Error: El costo debe ser un número entero.")
+
+def consultar_centro_especifico():
+    """Busca un centro por nombre usando el algoritmo de Búsqueda Binaria."""
+    centros = cargar_centros()
+    if not centros:
+        print("\n[!] No hay centros registrados para buscar.")
+        return
+
+    # REQUISITO: La búsqueda binaria necesita la lista ordenada por nombre
+    centros_ordenados = ordenar_burbuja(centros, "nombre")
+    nombre_buscado = input("\nIngrese el nombre del centro a buscar: ").strip().lower()
+
+    izq = 0
+    der = len(centros_ordenados) - 1
+    encontrado = None
+
+    while izq <= der:
+        medio = (izq + der) // 2
+        nombre_actual = centros_ordenados[medio]["nombre"].lower()
+        
+        if nombre_actual == nombre_buscado:
+            encontrado = centros_ordenados[medio]
+            break
+        elif nombre_actual < nombre_buscado:
+            izq = medio + 1
+        else:
+            der = medio - 1
+
+    if encontrado:
+        print(f"\n[Resultado] Centro: {encontrado['nombre']} | Región: {encontrado['region']} | Costo: ${encontrado['costo']}")
+    else:
+        print("\n[!] Centro no encontrado en el sistema.")
 
 def listar_centros_admin():
     centros = cargar_centros()
@@ -146,6 +257,63 @@ def listar_centros_admin():
     for i, c in enumerate(centros):
         print(f"{i+1:<2} | {c['nombre']:<12} | {c['region']:<10} | {c['costo']}")
 
+def actualizar_centro():
+    """Literal 16: Actualizar información de centros existentes."""
+    centros = cargar_centros()
+    if not centros:
+        print("\n[!] No hay centros registrados para actualizar.")
+        return
+
+    nombre_buscado = input("\nIngrese el nombre del centro que desea actualizar: ").strip().lower()
+    encontrado = False
+
+    for centro in centros:
+        if centro["nombre"].lower() == nombre_buscado:
+            print(f"\nDatos actuales - Región: {centro['region']}, Costo: {centro['costo']}")
+            
+            # Pedimos los nuevos datos
+            nuevo_nombre = input("Nuevo nombre (deje vacío para no cambiar): ")
+            nueva_region = input("Nueva región (deje vacío para no cambiar): ")
+            nuevo_costo = input("Nuevo costo (deje vacío para no cambiar): ")
+
+            # Actualizamos solo si el usuario ingresó algo
+            if nuevo_nombre: centro["nombre"] = nuevo_nombre
+            if nueva_region: centro["region"] = nueva_region
+            if nuevo_costo: centro["costo"] = int(nuevo_costo)
+            
+            encontrado = True
+            break    
+
+    if encontrado:
+        # Guardamos toda la lista actualizada en el archivo (modo 'w' para sobrescribir)
+        with open("centros.txt", "w") as f:
+            for c in centros:
+                f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
+        print("\n[Sistema] Información actualizada correctamente en centros.txt.")
+    else:
+        print("\n[!] No se encontró el centro solicitado.")
+
+def eliminar_centro():
+    """Literal 17: Eliminar centros o rutas del archivo centros.txt."""
+    centros = cargar_centros()
+    if not centros:
+        print("\n[!] No hay centros registrados para eliminar.")
+        return
+
+    nombre_eliminar = input("\nIngrese el nombre del centro que desea eliminar: ").strip().lower()
+    
+    # Creamos una nueva lista EXCLUYENDO el centro que queremos borrar
+    centros_restantes = [c for c in centros if c["nombre"].lower() != nombre_eliminar]
+
+    if len(centros_restantes) < len(centros):
+        # Si la lista es más pequeña, significa que sí encontramos y quitamos el centro
+        with open("centros.txt", "w") as f:
+            for c in centros_restantes:
+                f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
+        print(f"\n[Sistema] El centro '{nombre_eliminar}' ha sido eliminado exitosamente.")
+    else:
+        print("\n[!] No se encontró ningún centro con ese nombre.")
+
 def mostrar_menu_principal():
     print("\n" + "="*30)
     print("   SISTEMA POLIDELIVERY")
@@ -155,11 +323,49 @@ def mostrar_menu_principal():
 
 def menu_administrador():
     print("\n--- PANEL DE ADMINISTRADOR ---")
-    print("1. Agregar centros\n2. Listar centros\n7. Cerrar Sesión")
+    print("1. Agregar centros")
+    print("2. Listar centros (Ordenamiento)")
+    print("3. Consultar centro específico (Búsqueda Binaria)") # Requisito Literal 16
+    print("4. Actualizar información") # Requisito Literal 16
+    print("5. Eliminar centros") # Requisito Literal 17
+    print("7. Cerrar Sesión")
 
+
+# ==========================================
+# SECCIÓN: gestion del cliente 
+# ==========================================
 def menu_cliente():
     print("\n--- MENÚ DE CLIENTE ---")
-    print("1. Ver mapa\n7. Cerrar Sesión")
+    print("1. Ver mapa de centros")
+    print("2. Consultar ruta óptima (Dijkstra)") # Agregamos esto para que sea visible
+    print("7. Cerrar Sesión")
+
+def mostrar_mapa_centros():
+    
+    grafo = construir_grafo()
+    print("\n--- MAPA DE CENTROS Y CONEXIONES ---")
+    if not grafo:
+        print("[!] No hay centros registrados.")
+        return
+        
+    for centro, conexiones in grafo.items():
+        print(f"[{centro}] se conecta con:")
+        for vecino, costo in conexiones:
+            print(f"   -> {vecino} (Costo estimado: ${costo})")    
+def consultar_ruta_cliente():
+    """Literal 12: Interfaz para que el cliente consulte su envío."""
+    print("\n--- Consultar Ruta de Envío Óptima ---")
+    origen = input("Ciudad de origen: ")
+    destino = input("Ciudad de destino: ")
+    
+    ruta, costo_total = calcular_ruta_optima(origen, destino)
+    
+    if ruta:
+        print(f"\n[Éxito] Ruta encontrada: {' -> '.join(ruta)}")
+        print(f"[Costo Total] ${costo_total}")
+    else:
+        print("\n[!] No se pudo calcular una ruta entre esas ciudades.")
+
 
 # ==========================================
 # SECCIÓN: EJECUCIÓN PRINCIPAL
@@ -174,6 +380,7 @@ while True:
     if opcion == "1":
         rol = iniciar_sesion()
         
+        # MENÚ PARA ADMINISTRADOR
         if rol == "administrador":
             while True:
                 menu_administrador()
@@ -181,9 +388,18 @@ while True:
                 if sub_opcion == "7": 
                     break
                 elif sub_opcion == "1":
-                    print("Lógica para agregar centros... (Pendiente)")
+                    agregar_centro() 
                 elif sub_opcion == "2":
-                    listar_centros_admin()
+                    listar_centros_admin() 
+                elif sub_opcion == "3":
+                    consultar_centro_especifico() 
+                elif sub_opcion == "4":
+                    actualizar_centro() 
+                elif sub_opcion == "5":
+                    eliminar_centro()
+
+
+        # MENÚ PARA CLIENTE
 
         elif rol == "cliente":
             while True:
@@ -192,10 +408,13 @@ while True:
                 if sub_opcion == "7": 
                     break
                 elif sub_opcion == "1":
-                    print("Mostrando mapa... (Pendiente)")
-
+                    mostrar_mapa_centros() 
+                elif sub_opcion == "2":
+                    consultar_ruta_cliente() 
+                    
     elif opcion == "2":
         registrar_cliente()
+        
     elif opcion == "3":
         print("Saliendo... ¡Hasta pronto!")
         break

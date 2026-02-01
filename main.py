@@ -137,7 +137,29 @@ def quick_sort(lista, llave):
 # SECCIÓN: FUNCIONES DE SESIÓN Y REGISTRO
 # ==========================================
 
+def validar_correo(correo):
+    """Verifica que el correo tenga un formato básico: algo@algo.algo"""
+    if "@" in correo and "." in correo:
+        # Verificamos que el punto esté después del arroba
+        posicion_arroba = correo.find("@")
+        posicion_punto = correo.rfind(".") # Busca el último punto
+        if posicion_punto > posicion_arroba:
+            return True
+    return False
 
+
+def registrar_cliente():
+    
+    # VALIDACIÓN DE CORREO
+    correo_valido = False
+    while not correo_valido:
+        correo = input("Usuario (ejemplo@gmail.com): ")
+        if validar_correo(correo):
+            correo_valido = True
+        else:
+            print("Error: El formato del correo es inválido. Debe incluir '@' y un '.'")
+
+    # ... (continúa con la contraseña)
 def registrar_cliente():
     print("\n--- Registro de Nuevo Cliente ---")
     nombre = input("Nombres y Apellidos: ")

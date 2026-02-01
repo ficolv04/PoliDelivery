@@ -1,3 +1,5 @@
 Admin Inicial,000,99,admin@gmail.com,Admin123,administrador
 karen Quinatoa,1753700531,21,karen@gmail.com,Cliente123,cliente
 karen quinatoa,1753700531,21,karen.quinatoa@epn.edu.ec,Cliente123,cliente
+karen quinatoa,1753700531,21,karenquinatoa149@gmail.com,Cliente123,cliente
+karen quinatoa,1753700531,21,karen@gmail.com,Cliente123,cliente

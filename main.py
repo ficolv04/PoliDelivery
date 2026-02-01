@@ -140,32 +140,27 @@ def quick_sort(lista, llave):
 def validar_correo(correo):
     """Verifica que el correo tenga un formato básico: algo@algo.algo"""
     if "@" in correo and "." in correo:
-        # Verificamos que el punto esté después del arroba
         posicion_arroba = correo.find("@")
-        posicion_punto = correo.rfind(".") # Busca el último punto
+        posicion_punto = correo.rfind(".")
         if posicion_punto > posicion_arroba:
             return True
     return False
 
 
 def registrar_cliente():
-    
-    # VALIDACIÓN DE CORREO
-    correo_valido = False
-    while not correo_valido:
-        correo = input("Usuario (ejemplo@gmail.com): ")
-        if validar_correo(correo):
-            correo_valido = True
-        else:
-            print("Error: El formato del correo es inválido. Debe incluir '@' y un '.'")
-
-    # ... (continúa con la contraseña)
-def registrar_cliente():
     print("\n--- Registro de Nuevo Cliente ---")
     nombre = input("Nombres y Apellidos: ")
-    cedula = input("Identificacion: ")
     
-    # --- BLOQUE DE VALIDACIÓN DE EDAD ---
+    # Validación de Identificación (Cédula)
+    cedula_valida = False
+    while not cedula_valida:
+        cedula = input("Identificacion (solo números): ")
+        if cedula.isdigit() and len(cedula) == 10:
+            cedula_valida = True
+        else:
+            print("Error: La identificación debe tener 10 dígitos numéricos.")
+
+    # Validación de Edad
     edad_valida = False
     while not edad_valida:
         edad_input = input("Edad: ")
@@ -176,18 +171,25 @@ def registrar_cliente():
             else:
                 print("Error: Ingrese una edad real (1-119).")
         else:
-            print("Error: La edad debe ser un número. No ingrese letras.")
-    
+            print("Error: La edad debe ser un número.")
 
-    correo = input("Usuario (ejemplo@gmail.com): ")
-    
+    # VALIDACIÓN DE CORREO
+    correo_valido = False
+    while not correo_valido:
+        correo = input("Usuario (ejemplo@gmail.com): ")
+        if validar_correo(correo):
+            correo_valido = True
+        else:
+            print("Error: El formato del correo es inválido. Debe incluir '@' y un '.'")
+
+    # Validación de Contraseña
     es_segura = False
     while not es_segura:
         password = input("Contraseña segura: ")
         if validar_contrasena(password):
             es_segura = True
         else:
-            print("Error: La clave debe tener minusculas, mayusculas y numeros.")
+            print("Error: La clave debe tener minúsculas, mayúsculas y números.")
 
     with open("usuarios.txt", "a") as archivo:
         archivo.write(f"{nombre},{cedula},{edad},{correo},{password},cliente\n")

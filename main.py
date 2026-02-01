@@ -1,6 +1,6 @@
 # PROYECTO FINAL: POLIDELIVERY
 # Asignatura: Algoritmos y Estructuras de Datos
-# Fecha: 2026-01-31
+# Fecha: 2026- 02- 04
 
 import os
 import heapq # Requisito: Heap para Dijkstra 

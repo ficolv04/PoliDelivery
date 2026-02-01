@@ -137,11 +137,26 @@ def quick_sort(lista, llave):
 # SECCIÓN: FUNCIONES DE SESIÓN Y REGISTRO
 # ==========================================
 
+
 def registrar_cliente():
     print("\n--- Registro de Nuevo Cliente ---")
     nombre = input("Nombres y Apellidos: ")
     cedula = input("Identificacion: ")
-    edad = input("Edad: ")
+    
+    # --- BLOQUE DE VALIDACIÓN DE EDAD ---
+    edad_valida = False
+    while not edad_valida:
+        edad_input = input("Edad: ")
+        if edad_input.isdigit(): 
+            edad = int(edad_input)
+            if 0 < edad < 120: 
+                edad_valida = True
+            else:
+                print("Error: Ingrese una edad real (1-119).")
+        else:
+            print("Error: La edad debe ser un número. No ingrese letras.")
+    
+
     correo = input("Usuario (ejemplo@gmail.com): ")
     
     es_segura = False
@@ -411,7 +426,7 @@ while True:
                     mostrar_mapa_centros() 
                 elif sub_opcion == "2":
                     consultar_ruta_cliente() 
-                    
+
     elif opcion == "2":
         registrar_cliente()
         

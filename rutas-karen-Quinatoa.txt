@@ -1,3 +1,4 @@
-Envío de: karen Quinatoa
-Cuenca,Sierra,120
+Envío de: karen quinatoa
 Guayaquil,Costa,400
+Quito,Sierra,0
+COSTO TOTAL: $400

@@ -12,12 +12,10 @@ from collections import deque # Para BFS
 # ==========================================
 
 def preparar_archivo_usuarios():
-    """Crea el archivo de usuarios con un administrador inicial si no existe."""
-    if not os.path.exists("usuarios.txt"):
+    """Crea el archivo de usuarios con un administrador inicial si no existe o está vacío."""
+    if (not os.path.exists("usuarios.txt")) or (os.path.getsize("usuarios.txt") == 0):
         with open("usuarios.txt", "w") as archivo:
             archivo.write("Admin Inicial,000,99,admin@gmail.com,Admin123,administrador\n")
-    # Nota: Si el archivo existe pero está vacío, el administrador no estará. 
-    # Asegúrate de borrar el .txt si quieres que se cree de nuevo.
 
 def cargar_centros():
     """Lee los centros desde centros.txt y los retorna como una lista de diccionarios."""
@@ -27,11 +25,17 @@ def cargar_centros():
             for linea in f:
                 datos = linea.strip().split(",")
                 if len(datos) == 3:
+                    try:
+                        costo = int(datos[2])
+                    except ValueError:
+                        continue
+
                     centros.append({
                         "nombre": datos[0],
                         "region": datos[1],
-                        "costo": int(datos[2])
+                        "costo": costo
                     })
+
     return centros
 
 # ==========================================
@@ -87,7 +91,10 @@ def explorar_arbol_recursivo(nodo, nivel=0):
 # ==========================================
 
 def bfs_centros_cercanos(grafo, inicio):
-    """Literal 15: BFS para búsqueda de centros cercanos."""
+    if inicio not in grafo:
+        print("Error: Centro inicial no existe.")
+        return
+
     visitados = set([inicio])
     cola = deque([inicio])
     print(f"\nCentros cercanos a {inicio}:")
@@ -99,8 +106,13 @@ def bfs_centros_cercanos(grafo, inicio):
                 cola.append(vecino)
                 print(f" -> {vecino}")
 
+
 def dfs_exploracion_completa(grafo, inicio, visitados=None):
-    """Literal 15: DFS para exploración completa de rutas."""
+    
+    if inicio not in grafo:
+        print("Error: Centro inicial no existe.")
+        return
+
     if visitados is None: visitados = set()
     visitados.add(inicio)
     print(f"Visitando: {inicio}")
@@ -124,17 +136,37 @@ def gestionar_envio_cliente(nombre_cliente):
         
         if op == "1":
             centros = cargar_centros()
-            for i, c in enumerate(centros): print(f"{i}. {c['nombre']}")
-            idx = int(input("Ingrese el ID del centro a añadir: "))
+
+            if not centros:
+                print("No hay centros registrados.")
+                continue
+
+            for i, c in enumerate(centros):
+                print(f"{i}. {c['nombre']}")
+
+            idx_txt = input("Ingrese el ID del centro a añadir: ").strip()
+            if not idx_txt.isdigit():
+                print("Error: Debe ingresar un numero.")
+                continue
+
+            idx = int(idx_txt)
+            if idx < 0 or idx >= len(centros):
+                print("Error: ID fuera de rango.")
+                continue
+
             envio_actual.append(centros[idx])
-        
         elif op == "2":
             if not envio_actual: print("Vacío."); continue
             print("\n1. Ordenar por Nombre\n2. Ordenar por Costo")
-            met = input("Método: ")
-            if met == "1": envio_actual = quick_sort(envio_actual, "nombre")
-            else: envio_actual = quick_sort(envio_actual, "costo")
-            for c in envio_actual: print(f"- {c['nombre']} (${c['costo']})")
+            met = input("Método: ").strip()
+            if met == "1":
+                envio_actual = quick_sort(envio_actual, "nombre")
+            elif met == "2":
+                envio_actual = quick_sort(envio_actual, "costo")
+            else:
+                print("Opción inválida.")
+                continue
+
         
         elif op == "3":
             envio_actual = []
@@ -364,9 +396,6 @@ def iniciar_sesion():
     return "ninguno" , None
 
 # ==========================================
-# SECCIÓN: MENÚS Y VISTAS
-# ==========================================
-# ==========================================
 # SECCIÓN: GESTIÓN DE CENTROS (ADMIN)
 # ==========================================
 
@@ -380,7 +409,7 @@ def agregar_centro():
     centros = cargar_centros()
     for c in centros:
         if c["nombre"].lower() == nombre.lower():
-            print("[!] Error: El centro ya existe.")
+            print(" Error: El centro ya existe.")
             return
         
     try:
@@ -390,13 +419,13 @@ def agregar_centro():
             f.write(f"{nombre},{region},{costo}\n")
         print(f"\n[Sistema] Centro '{nombre}' guardado exitosamente.")
     except ValueError:
-        print("\n[!] Error: El costo debe ser un número entero.")
+        print("\nError: El costo debe ser un número entero.")
 
 def consultar_centro_especifico():
     """Busca un centro por nombre usando el algoritmo de Búsqueda Binaria."""
     centros = cargar_centros()
     if not centros:
-        print("\n[!] No hay centros registrados para buscar.")
+        print("\n No hay centros registrados para buscar.")
         return
 
     # REQUISITO: La búsqueda binaria necesita la lista ordenada por nombre
@@ -422,12 +451,12 @@ def consultar_centro_especifico():
     if encontrado:
         print(f"\n[Resultado] Centro: {encontrado['nombre']} | Región: {encontrado['region']} | Costo: ${encontrado['costo']}")
     else:
-        print("\n[!] Centro no encontrado en el sistema.")
+        print("\n Centro no encontrado en el sistema.")
 
 def listar_centros_admin():
     centros = cargar_centros()
     if not centros:
-        print("\n[!] No hay centros registrados en centros.txt.")
+        print("\n No hay centros registrados en centros.txt.")
         return
 
     print("\n1. Ordenar por Nombre (Burbuja)")
@@ -451,7 +480,7 @@ def actualizar_centro():
     """Literal 16: Actualizar información de centros existentes."""
     centros = cargar_centros()
     if not centros:
-        print("\n[!] No hay centros registrados para actualizar.")
+        print("\n No hay centros registrados para actualizar.")
         return
 
     nombre_buscado = input("\nIngrese el nombre del centro que desea actualizar: ").strip().lower()
@@ -481,13 +510,13 @@ def actualizar_centro():
                 f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
         print("\n[Sistema] Información actualizada correctamente en centros.txt.")
     else:
-        print("\n[!] No se encontró el centro solicitado.")
+        print("\n No se encontró el centro solicitado.")
 
 def eliminar_centro():
     """Literal 17: Eliminar centros o rutas del archivo centros.txt."""
     centros = cargar_centros()
     if not centros:
-        print("\n[!] No hay centros registrados para eliminar.")
+        print("\n No hay centros registrados para eliminar.")
         return
 
     nombre_eliminar = input("\nIngrese el nombre del centro que desea eliminar: ").strip().lower()
@@ -502,7 +531,7 @@ def eliminar_centro():
                 f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
         print(f"\n[Sistema] El centro '{nombre_eliminar}' ha sido eliminado exitosamente.")
     else:
-        print("\n[!] No se encontró ningún centro con ese nombre.")
+        print("\n No se encontró ningún centro con ese nombre.")
 
 def mostrar_menu_principal():
     print("\n" + "="*30)
@@ -518,7 +547,7 @@ def menu_administrador():
     print("3. Consultar centro específico (Búsqueda Binaria)") # Requisito Literal 16
     print("4. Actualizar información") # Requisito Literal 16
     print("5. Eliminar centros") # Requisito Literal 17
-    print("6. Cerrar Sesión")
+    print("7. Cerrar Sesión")
 
 
 # ==========================================
@@ -535,18 +564,21 @@ def mostrar_mapa_centros():
     grafo = construir_grafo()
     print("\n--- MAPA DE CENTROS Y CONEXIONES ---")
     if not grafo:
-        print("[!] No hay centros registrados.")
+        print(" No hay centros registrados.")
         return
         
     for centro, conexiones in grafo.items():
         print(f"[{centro}] se conecta con:")
         for vecino, costo in conexiones:
             print(f"   -> {vecino} (Costo estimado: ${costo})")    
+
 def consultar_ruta_cliente():
     """Literal 12: Interfaz para que el cliente consulte su envío."""
     print("\n--- Consultar Ruta de Envío Óptima ---")
-    origen = input("Ciudad de origen: ")
-    destino = input("Ciudad de destino: ")
+    
+    origen = input("Ciudad de origen: ").strip()
+    destino = input("Ciudad de destino: ").strip()
+
     
     ruta, costo_total = calcular_ruta_optima(origen, destino)
     
@@ -554,7 +586,9 @@ def consultar_ruta_cliente():
         print(f"\n[Éxito] Ruta encontrada: {' -> '.join(ruta)}")
         print(f"[Costo Total] ${costo_total}")
     else:
-        print("\n[!] No se pudo calcular una ruta entre esas ciudades.")
+        print("\n No se pudo calcular una ruta entre esas ciudades.")
+
+    
 
 def menu_cliente_completo(nombre_cliente):
     while True:
@@ -610,7 +644,7 @@ while True:
             while True:
                 menu_administrador()
                 sub_opcion = input("Seleccione una acción: ")
-                if sub_opcion == "6": 
+                if sub_opcion == "7": 
                     break
                 elif sub_opcion == "1":
                     agregar_centro() 

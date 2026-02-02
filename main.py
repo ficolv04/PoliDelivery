@@ -468,7 +468,7 @@ def menu_administrador():
     print("3. Consultar centro específico (Búsqueda Binaria)") # Requisito Literal 16
     print("4. Actualizar información") # Requisito Literal 16
     print("5. Eliminar centros") # Requisito Literal 17
-    print("7. Cerrar Sesión")
+    print("6. Cerrar Sesión")
 
 
 # ==========================================
@@ -478,7 +478,7 @@ def menu_cliente():
     print("\n--- MENÚ DE CLIENTE ---")
     print("1. Ver mapa de centros")
     print("2. Consultar ruta óptima (Dijkstra)") # Agregamos esto para que sea visible
-    print("7. Cerrar Sesión")
+    print("5. Cerrar Sesión")
 
 def mostrar_mapa_centros():
     
@@ -508,17 +508,29 @@ def consultar_ruta_cliente():
 
 def menu_cliente_completo(nombre_cliente):
     while True:
-        menu_cliente() # El menú que ya tenías
+        print("\n--- MENÚ DE CLIENTE ---")
+        print("1. Ver mapa de centros")
+        print("2. Consultar ruta óptima (Dijkstra)")
         print("3. Explorar Jerarquía (Árboles)")
         print("4. Gestionar Carrito de Envío")
+        print("5. Cerrar Sesión")
+
         sub = input("Seleccione: ")
-        if sub == "7": break
-        elif sub == "1": mostrar_mapa_centros()
-        elif sub == "2": consultar_ruta_cliente()
+
+        if sub == "5":
+            break
+        elif sub == "1":
+            mostrar_mapa_centros()
+        elif sub == "2":
+            consultar_ruta_cliente()
         elif sub == "3":
             arbol = construir_arbol_regiones(cargar_centros())
             explorar_arbol_recursivo(arbol)
-        elif sub == "4": gestionar_envio_cliente(nombre_cliente)
+        elif sub == "4":
+            gestionar_envio_cliente(nombre_cliente)
+        else:
+            print("Opción inválida.")
+
 # ==========================================
 # SECCIÓN: EJECUCIÓN PRINCIPAL
 # ==========================================
@@ -537,7 +549,7 @@ while True:
             while True:
                 menu_administrador()
                 sub_opcion = input("Seleccione una acción: ")
-                if sub_opcion == "7": 
+                if sub_opcion == "6": 
                     break
                 elif sub_opcion == "1":
                     agregar_centro() 

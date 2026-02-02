@@ -4,3 +4,4 @@ karen quinatoa,1753700531,21,karen.quinatoa@epn.edu.ec,Cliente123,cliente
 karen quinatoa,1753700531,21,karenquinatoa149@gmail.com,Cliente123,cliente
 karen quinatoa,1753700531,21,karen@gmail.com,Cliente123,cliente
 Elian Lara,0402006886,21,elian@gmail.com,Elian123,cliente
+Carlos David Malitasig Logroño,1750356451,23,carlos@gmail.com,Ca123,cliente

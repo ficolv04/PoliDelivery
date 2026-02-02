@@ -144,13 +144,18 @@ def gestionar_envio_cliente(nombre_cliente):
             if len(envio_actual) < 2:
                 print("Error: Debe seleccionar mínimo dos centros.")
             else:
-                # Literal 21: Guardar en archivo rutas-nombre-del-cliente.txt [cite: 21]
                 filename = f"rutas-{nombre_cliente.replace(' ', '-')}.txt"
+                total = sum(c["costo"] for c in envio_actual)
+
                 with open(filename, "w") as f:
                     f.write(f"Envío de: {nombre_cliente}\n")
-                    for c in envio_actual: f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
+                    for c in envio_actual:
+                        f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
+                    f.write(f"COSTO TOTAL: ${total}\n")
+                    
                 print(f"Guardado en {filename}")
                 break
+
 
 #=======================================
 # SECCION: ALGORITMOS GRAFOS
@@ -213,6 +218,28 @@ def calcular_ruta_optima(inicio, destino):
                 heapq.heappush(cola_prioridad, (costo + peso, vecino, camino))
 
     return None, float('inf')
+
+def mostrar_matriz_costos():
+
+    grafo = construir_grafo()
+    centros = list(grafo.keys())
+
+    print("\n--- MATRIZ DE COSTOS ---")
+    print(" " * 15, end="")
+    for c in centros:
+        print(f"{c[:10]:>12}", end="")
+    print()
+
+    for c1 in centros:
+        print(f"{c1[:12]:<12}", end=" ")
+        for c2 in centros:
+            if c1 == c2:
+                print(f"{0:>12}", end="")
+            else:
+                costo = next((c for v, c in grafo[c1] if v == c2), "-")
+                print(f"{costo:>12}", end="")
+        print()
+
 # ==========================================
 # SECCIÓN: ALGORITMOS DE ORDENAMIENTO
 # ==========================================
@@ -247,6 +274,19 @@ def validar_correo(correo):
             return True
     return False
 
+def correo_ya_existe(correo):
+    """Verifica si el correo ya está registrado en usuarios.txt."""
+    if not os.path.exists("usuarios.txt"):
+        return False
+    
+    with open("usuarios.txt", "r") as archivo:
+        for linea in archivo:
+            datos = linea.strip().split(",")
+            if len(datos) >= 4:
+                # El correo está en la posición 3 según tu lógica de guardado
+                if datos[3].lower() == correo.lower():
+                    return True
+    return False
 
 def registrar_cliente():
     print("\n--- Registro de Nuevo Cliente ---")
@@ -277,11 +317,14 @@ def registrar_cliente():
     # VALIDACIÓN DE CORREO
     correo_valido = False
     while not correo_valido:
-        correo = input("Usuario (ejemplo@gmail.com): ")
-        if validar_correo(correo):
-            correo_valido = True
-        else:
+        correo = input("Usuario (ejemplo@gmail.com): ").strip()
+        
+        if not validar_correo(correo):
             print("Error: El formato del correo es inválido. Debe incluir '@' y un '.'")
+        elif correo_ya_existe(correo): # Esta es la nueva función de apoyo
+            print(f"Error: El correo '{correo}' ya está registrado. Intente con otro.")
+        else:
+            correo_valido = True
 
     # Validación de Contraseña
     es_segura = False
@@ -333,6 +376,13 @@ def agregar_centro():
     print("\n--- Agregar Nuevo Centro de Distribución ---")
     nombre = input("Nombre del centro: ")
     region = input("Región (Costa/Sierra/Oriente): ")
+
+    centros = cargar_centros()
+    for c in centros:
+        if c["nombre"].lower() == nombre.lower():
+            print("[!] Error: El centro ya existe.")
+            return
+        
     try:
         costo = int(input("Costo de envío base: "))
         # Guardamos en el archivo usando "a" (append) para no borrar lo anterior
@@ -513,11 +563,13 @@ def menu_cliente_completo(nombre_cliente):
         print("2. Consultar ruta óptima (Dijkstra)")
         print("3. Explorar Jerarquía (Árboles)")
         print("4. Gestionar Carrito de Envío")
-        print("5. Cerrar Sesión")
+        print("5. Ver centros cercanos (BFS)")
+        print("6. Explorar rutas completas (DFS)")
+        print("7. Cerrar Sesión")
 
         sub = input("Seleccione: ")
 
-        if sub == "5":
+        if sub == "7":
             break
         elif sub == "1":
             mostrar_mapa_centros()
@@ -528,6 +580,15 @@ def menu_cliente_completo(nombre_cliente):
             explorar_arbol_recursivo(arbol)
         elif sub == "4":
             gestionar_envio_cliente(nombre_cliente)
+        
+        elif sub == "5":
+            inicio = input("Centro inicial: ")
+            bfs_centros_cercanos(construir_grafo(), inicio)
+
+        elif sub == "6":
+            inicio = input("Centro inicial: ")
+            dfs_exploracion_completa(construir_grafo(), inicio)
+
         else:
             print("Opción inválida.")
 

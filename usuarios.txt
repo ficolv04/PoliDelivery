@@ -7,3 +7,5 @@ Elian Lara,0402006886,21,elian@gmail.com,Elian123,cliente
 Carlos David Malitasig Logroño,1750356451,23,carlos@gmail.com,Ca123,cliente
 karen quinatoa,1753700531,21,emilia@gmail.com,Cliente123,cliente
 karen quinatoa,1753700531,21,quinatoa@gmail.com,Cliente123,cliente
+123 karen,1753700531,21,hola@gmail.com,Cliente123,cliente
+,1753700531,21,alo@gmail.com,Cliente123,cliente

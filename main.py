@@ -130,7 +130,7 @@ def ordenar_burbuja(lista, llave):
     n = len(lista)
     for i in range(n):
         for j in range(0, n - i - 1):
-            if lista[j][llave] > lista[j + 1][llave]:
+            if str(lista[j][llave]).lower() > str(lista[j + 1][llave]).lower():
                 lista[j], lista[j + 1] = lista[j + 1], lista[j]
     return lista
 
@@ -300,10 +300,11 @@ def menu_administrador():
     print("7. Cerrar Sesión")
 
 def agregar_centro():
-    """Permite al administrador ingresar un nuevo centro al archivo .txt"""
+    
     print("\n--- Agregar Nuevo Centro de Distribución ---")
-    nombre = input("Nombre del centro: ")
-    region = input("Región (Costa/Sierra/Oriente): ")
+    nombre = input("Nombre del centro: ").lower()
+    region = input("Región (Costa/Sierra/Oriente): ").strip().capitalize()
+    
 
     centros = cargar_centros()
     for c in centros:
@@ -421,7 +422,7 @@ def eliminar_centro():
     nombre_eliminar = input("\nIngrese el nombre del centro que desea eliminar: ").strip().lower()
     
     # Creamos una nueva lista EXCLUYENDO el centro que queremos borrar
-    centros_restantes = [c for c in centros if c["nombre"].lower() != nombre_eliminar]
+    centros_restantes = [c for c in centros if c["nombre"].strip().lower() != nombre_eliminar.strip().lower()]
 
     if len(centros_restantes) < len(centros):
         # Si la lista es más pequeña, significa que sí encontramos y quitamos el centro

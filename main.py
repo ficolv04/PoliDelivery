@@ -6,11 +6,6 @@ import os
 import heapq # Requisito: Heap para Dijkstra 
 from collections import deque # Para BFS
 
-
-# ==========================================
-# SECCIÓN: PERSISTENCIA (Manejo de Archivos)
-# ==========================================
-
 def preparar_archivo_usuarios():
     if (not os.path.exists("usuarios.txt")) or (os.path.getsize("usuarios.txt") == 0):
         with open("usuarios.txt", "w") as archivo:
@@ -25,7 +20,6 @@ class NodoArbol:
     def __init__(self, nombre):
         self.nombre = nombre
         self.hijos = []
-
 
 # ==========================================
 # SECCIÓN: ALGORITMOS DE BÚSQUEDA (BFS/DFS)
@@ -99,7 +93,6 @@ def calcular_ruta_optima(inicio, destino):
     if inicio not in grafo or destino not in grafo:
         return None, float('inf')
 
-    # Cola de prioridad: (costo_acumulado, nodo_actual, camino_recorrido)
     cola_prioridad = [(0, inicio, [])]
     visitados = set()
 
@@ -148,7 +141,7 @@ def quick_sort(lista, llave):
 # ==========================================
 
 def validar_correo(correo):
-    """Verifica que el correo tenga un formato básico: algo@algo.algo"""
+
     if "@" in correo and "." in correo:
         posicion_arroba = correo.find("@")
         posicion_punto = correo.rfind(".")
@@ -157,7 +150,7 @@ def validar_correo(correo):
     return False
 
 def correo_ya_existe(correo):
-    """Verifica si el correo ya está registrado en usuarios.txt."""
+
     if not os.path.exists("usuarios.txt"):
         return False
     
@@ -165,7 +158,6 @@ def correo_ya_existe(correo):
         for linea in archivo:
             datos = linea.strip().split(",")
             if len(datos) >= 4:
-                # El correo está en la posición 3 según tu lógica de guardado
                 if datos[3].lower() == correo.lower():
                     return True
     return False
@@ -221,7 +213,7 @@ def registrar_cliente():
         
         if not validar_correo(correo):
             print("Error: El formato del correo es inválido. Debe incluir '@' y un '.'")
-        elif correo_ya_existe(correo): # Esta es la nueva función de apoyo
+        elif correo_ya_existe(correo):
             print(f"Error: El correo '{correo}' ya está registrado. Intente con otro.")
         else:
             correo_valido = True
@@ -304,7 +296,7 @@ def agregar_centro():
     print("\n--- Agregar Nuevo Centro de Distribución ---")
     nombre = input("Nombre del centro: ").lower()
     region = input("Región (Costa/Sierra/Oriente): ").strip().capitalize()
-    
+
 
     centros = cargar_centros()
     for c in centros:
@@ -344,13 +336,10 @@ def listar_centros_admin():
         print(f"{i+1:<2} | {c['nombre']:<12} | {c['region']:<10} | {c['costo']}")
 
 def consultar_centro_especifico():
-    """Busca un centro por nombre usando el algoritmo de Búsqueda Binaria."""
     centros = cargar_centros()
     if not centros:
         print("\n No hay centros registrados para buscar.")
         return
-
-    # REQUISITO: La búsqueda binaria necesita la lista ordenada por nombre
     centros_ordenados = ordenar_burbuja(centros, "nombre")
     nombre_buscado = input("\nIngrese el nombre del centro a buscar: ").strip().lower()
 
@@ -377,7 +366,6 @@ def consultar_centro_especifico():
 
 
 def actualizar_centro():
-    """Literal 16: Actualizar información de centros existentes."""
     centros = cargar_centros()
     if not centros:
         print("\n No hay centros registrados para actualizar.")
@@ -413,7 +401,6 @@ def actualizar_centro():
         print("\n No se encontró el centro solicitado.")
 
 def eliminar_centro():
-    """Literal 17: Eliminar centros o rutas del archivo centros.txt."""
     centros = cargar_centros()
     if not centros:
         print("\n No hay centros registrados para eliminar.")
@@ -421,11 +408,9 @@ def eliminar_centro():
 
     nombre_eliminar = input("\nIngrese el nombre del centro que desea eliminar: ").strip().lower()
     
-    # Creamos una nueva lista EXCLUYENDO el centro que queremos borrar
     centros_restantes = [c for c in centros if c["nombre"].strip().lower() != nombre_eliminar.strip().lower()]
 
     if len(centros_restantes) < len(centros):
-        # Si la lista es más pequeña, significa que sí encontramos y quitamos el centro
         with open("centros.txt", "w") as f:
             for c in centros_restantes:
                 f.write(f"{c['nombre']},{c['region']},{c['costo']}\n")
@@ -458,11 +443,6 @@ def mostrar_matriz_costos():
 # ==========================================
 # SECCIÓN: gestion del cliente 
 # ==========================================
-def menu_cliente():
-    print("\n--- MENÚ DE CLIENTE ---")
-    print("1. Ver mapa de centros")
-    print("2. Consultar ruta óptima (Dijkstra)") # Agregamos esto para que sea visible
-    print("5. Cerrar Sesión")
 
 def mostrar_mapa_centros():
     
@@ -478,7 +458,6 @@ def mostrar_mapa_centros():
             print(f"   -> {vecino} (Costo estimado: ${costo})")    
 
 def consultar_ruta_cliente():
-    """Literal 12: Interfaz para que el cliente consulte su envío."""
     print("\n--- Consultar Ruta de Envío Óptima ---")
     
     origen = input("Ciudad de origen: ").strip()
@@ -506,7 +485,6 @@ def construir_arbol_regiones(centros):
         regiones[reg].hijos.append(NodoArbol(c["nombre"]))
     return raiz
 def cargar_centros():
-    """Lee los centros desde centros.txt y los retorna como una lista de diccionarios."""
     centros = []
     if os.path.exists("centros.txt"):
         with open("centros.txt", "r") as f:
@@ -531,13 +509,12 @@ def explorar_arbol_recursivo(nodo, nivel=0):
     for hijo in nodo.hijos:
         explorar_arbol_recursivo(hijo, nivel + 1)
 
-envio_actual = [] # Lista para almacenar centros seleccionados [cite: 20]
+envio_actual = [] 
 
 def gestionar_envio_cliente(nombre_cliente):
-    """Literal 19-21: Seleccionar, listar, ordenar y guardar envío[cite: 19, 20, 21]."""
     global envio_actual
     while True:
-        print("\n--- GESTIÓN DE MI ENVÍO ---")
+        print("\n--- GESTIÓN DE MI ENVÍO -  --")
         print("1. Seleccionar centros (min 2)\n2. Listar y Ordenar selección\n3. Eliminar centros seleccionados\n4. Guardar y Salir")
         op = input("Seleccione: ")
         
@@ -597,15 +574,19 @@ def gestionar_envio_cliente(nombre_cliente):
 
 def menu_cliente_completo(nombre_cliente):
     while True:
-        print("\n--- MENÚ DE CLIENTE ---")
-        print("1. Ver mapa de centros")
+        print(f"\n--- MENÚ DE CLIENTE: {nombre_cliente} ---")
+        print("1. Ver mapa de centros")             
         print("2. Consultar ruta óptima (Dijkstra)")
-        print("3. Explorar Jerarquía (Árboles)")
-        print("4. Gestionar Carrito de Envío")
-        print("5. Ver centros cercanos (BFS)")
-        print("6. Explorar rutas completas (DFS)")
+        print("3. Explorar Jerarquía (Árboles)")    
+        print("4. Gestionar Carrito de Envío")      
+        print("5. Ver centros cercanos (BFS)")      
+        print("6. Explorar rutas completas (DFS)")  
         print("7. Cerrar Sesión")
 
+        sub = input("Seleccione una opción: ")
+        if sub == "7":
+            break
+        # Lógica de procesamiento de opciones...
         sub = input("Seleccione: ")
 
         if sub == "7":

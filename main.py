@@ -591,7 +591,6 @@ def menu_cliente_completo(nombre_cliente):
         if sub == "7":
             break
         # Lógica de procesamiento de opciones...
-        sub = input("Seleccione: ")
 
         if sub == "7":
             break

@@ -1,6 +1,5 @@
 Quito,Sierra,0
 Guayaquil,Costa,400
-Manta,Costa,225
 bolivar,sierra,100
 chimborazo,Sierra,140
 ambato,Sierra,140

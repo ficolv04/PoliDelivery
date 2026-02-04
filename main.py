@@ -76,16 +76,13 @@ def construir_grafo():
             
             distancia = (c1["costo"] + c2["costo"]) // 2
             
-            # Si son de diferente región, el envío es más caro (penalidad)
             if c1["region"] != c2["region"]:
                 distancia += 50 
             
-            # Añadimos la conexión bidireccional
             grafo[c1["nombre"]].append((c2["nombre"], distancia))
             grafo[c2["nombre"]].append((c1["nombre"], distancia))
             
     return grafo
-import heapq # Requisito del documento: Usar Heap para optimizar Dijkstra 
 
 def calcular_ruta_optima(inicio, destino):
     grafo = construir_grafo()
@@ -408,7 +405,14 @@ def eliminar_centro():
 
     nombre_eliminar = input("\nIngrese el nombre del centro que desea eliminar: ").strip().lower()
     
-    centros_restantes = [c for c in centros if c["nombre"].strip().lower() != nombre_eliminar.strip().lower()]
+    centros_restantes = []
+
+    for c in centros:
+        nombre_centro = c["nombre"].strip().lower()
+        nombre_a_eliminar = nombre_eliminar.strip().lower()
+
+        if nombre_centro != nombre_a_eliminar:
+            centros_restantes.append(c)
 
     if len(centros_restantes) < len(centros):
         with open("centros.txt", "w") as f:
@@ -498,7 +502,7 @@ def cargar_centros():
 
                     centros.append({
                         "nombre": datos[0],
-                        "region": datos[1],
+                        "region": datos[1].strip().capitalize(),
                         "costo": costo
                     })
 

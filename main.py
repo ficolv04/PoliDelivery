@@ -85,6 +85,11 @@ def construir_grafo():
     return grafo
 
 def calcular_ruta_optima(inicio, destino):
+
+    inicio = inicio.strip().lower()
+    destino = destino.strip().lower()
+
+
     grafo = construir_grafo()
     
     if inicio not in grafo or destino not in grafo:
@@ -464,8 +469,10 @@ def mostrar_mapa_centros():
 def consultar_ruta_cliente():
     print("\n--- Consultar Ruta de Envío Óptima ---")
     
-    origen = input("Ciudad de origen: ").strip()
-    destino = input("Ciudad de destino: ").strip()
+    
+    origen = input("Ciudad de origen: ").strip().lower()
+    destino = input("Ciudad de destino: ").strip().lower()
+
 
     
     ruta, costo_total = calcular_ruta_optima(origen, destino)
@@ -501,7 +508,7 @@ def cargar_centros():
                         continue
 
                     centros.append({
-                        "nombre": datos[0],
+                        "nombre": datos[0].strip().lower(),
                         "region": datos[1].strip().capitalize(),
                         "costo": costo
                     })
